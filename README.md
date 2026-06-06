@@ -1,0 +1,1 @@
+# jooq-box-gradle-plugin
