@@ -1,0 +1,102 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, release/** ]
+  pull_request:
+    branches: [ main, release/** ]
+  workflow_call:
+
+jobs:
+  compile:
+    name: Job - Plugin Compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Plugin - Format Check
+        run: ./gradlew spotlessCheck
+
+      - name: Plugin - Compile
+        run: ./gradlew compileKotlin
+
+  test:
+    name: Job - Plugin Test
+    runs-on: ubuntu-latest
+    needs: compile
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Plugin - Test
+        id: check
+        run: ./gradlew check
+        env:
+          FAIL_FAST: ${{ github.event_name == 'workflow_call' }}
+
+      - name: Plugin - Test - Summary
+        uses: mikepenz/action-junit-report@v6
+        if: always()
+        with:
+          check_name: Report - Plugin Test
+          report_paths: 'build/test-results/**/TEST-*.xml'
+
+      - name: Plugin - Test - Upload Report
+        uses: actions/upload-artifact@v7
+        if: failure() && steps.check.outcome == 'failure'
+        with:
+          name: test-reports
+          path: 'build/reports/tests/'
+          retention-days: 7
+
+  consumer:
+    name: Job - Consumer Build
+    runs-on: ubuntu-latest
+    needs: compile
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Plugin - Consumer Project - Build
+        run: |
+          for dir in consumer/*/; do
+            name=$(basename "$dir")
+            echo "::group::Consumer: $name"
+            ./gradlew ":${name}:build"
+            echo "::endgroup::"
+          done

@@ -1,0 +1,38 @@
+[versions]
+kotlin = "2.2.0"
+gradle-plugin-publish = "1.3.1"
+spotless = "8.6.0"
+# Implementation
+testcontainers = "2.0.5"
+jooq = "3.19.33"
+flyway = "11.14.1"
+liquibase = "5.0.2"
+# Runtime
+driver-postgres = "42.7.11"
+driver-mysql = "9.6.0"
+driver-mariadb = "3.5.7"
+driver-h2 = "2.3.232"
+driver-sqlite = "3.47.1.0"
+driver-hsqldb = "2.7.4"
+# Test
+junit-jupiter = "6.1.0"
+assertj = "3.27.7"
+
+[libraries]
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-mysql = { module = "org.testcontainers:testcontainers-mysql", version.ref = "testcontainers" }
+testcontainers-mariadb = { module = "org.testcontainers:testcontainers-mariadb", version.ref = "testcontainers" }
+
+jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+
+# Test
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit-jupiter" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

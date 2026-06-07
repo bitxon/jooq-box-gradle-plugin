@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://www.jooq.org/xsd/jooq-codegen-3.19.0.xsd">
+    <generator>
+        <database>
+            <inputSchema>PUBLIC</inputSchema>
+            <includes>users|addresses</includes>
+        </database>
+        <generate>
+            <pojos>true</pojos>
+        </generate>
+        <target>
+            <packageName>com.example.jooq</packageName>
+            <directory>build/generated-sources/jooq</directory>
+        </target>
+    </generator>
+</configuration>
