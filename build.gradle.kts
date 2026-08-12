@@ -1,3 +1,5 @@
+import org.gradle.plugin.compatibility.compatibility
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     `java-gradle-plugin`
@@ -42,13 +44,18 @@ gradlePlugin {
             displayName = "jOOQ Box"
             description = "Generates jOOQ code by spinning up a real database via Testcontainers and running Flyway/Liquibase migrations"
             tags = listOf("jooq", "codegen", "testcontainers", "docker", "flyway", "liquibase")
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
 
 // Writes plugin default versions into a .properties file bundled in the JAR.
 // JooqBoxPlugin reads it at runtime — single source of truth in libs.versions.toml.
-val generatePluginConstants by tasks.registering {
+val generatePluginConstants = tasks.register("generatePluginConstants") {
     val outputDir = layout.buildDirectory.dir("generated/plugin-constants")
     outputs.dir(outputDir)
     doLast {
@@ -76,7 +83,7 @@ sourceSets.main {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
+        val test = getByName<JvmTestSuite>("test") {
             useJUnitJupiter(libs.versions.junit.jupiter.get())
             dependencies {
                 implementation(gradleTestKit())
@@ -85,7 +92,7 @@ testing {
                 implementation(libs.assertj.core)
             }
         }
-        val functionalTest by registering(JvmTestSuite::class) {
+        val functionalTest = register<JvmTestSuite>("functionalTest") {
             useJUnitJupiter(libs.versions.junit.jupiter.get())
             dependencies {
                 implementation(gradleTestKit())
