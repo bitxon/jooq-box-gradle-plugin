@@ -56,24 +56,24 @@ gradlePlugin {
 // Writes plugin default versions into a .properties file bundled in the JAR.
 // JooqBoxPlugin reads it at runtime — single source of truth in libs.versions.toml.
 val generatePluginConstants = tasks.register("generatePluginConstants") {
+    val defaults = mapOf(
+        "jooq.version" to libs.versions.jooq.get(),
+        "flyway.version" to libs.versions.flyway.get(),
+        "liquibase.version" to libs.versions.liquibase.get(),
+        "driver.postgres.version" to libs.versions.driver.postgres.get(),
+        "driver.mysql.version" to libs.versions.driver.mysql.get(),
+        "driver.mariadb.version" to libs.versions.driver.mariadb.get(),
+        "driver.h2.version" to libs.versions.driver.h2.get(),
+        "driver.sqlite.version" to libs.versions.driver.sqlite.get(),
+        "driver.hsqldb.version" to libs.versions.driver.hsqldb.get(),
+    )
     val outputDir = layout.buildDirectory.dir("generated/plugin-constants")
+    inputs.properties(defaults)
     outputs.dir(outputDir)
     doLast {
         val props = outputDir.get().file("plugin-defaults.properties").asFile
         props.parentFile.mkdirs()
-        props.writeText(
-            """
-            jooq.version=${libs.versions.jooq.get()}
-            flyway.version=${libs.versions.flyway.get()}
-            liquibase.version=${libs.versions.liquibase.get()}
-            driver.postgres.version=${libs.versions.driver.postgres.get()}
-            driver.mysql.version=${libs.versions.driver.mysql.get()}
-            driver.mariadb.version=${libs.versions.driver.mariadb.get()}
-            driver.h2.version=${libs.versions.driver.h2.get()}
-            driver.sqlite.version=${libs.versions.driver.sqlite.get()}
-            driver.hsqldb.version=${libs.versions.driver.hsqldb.get()}
-            """.trimIndent()
-        )
+        props.writeText(defaults.entries.joinToString("\n") { (k, v) -> "$k=$v" })
     }
 }
 
@@ -103,7 +103,7 @@ testing {
             targets.all {
                 testTask.configure {
                     shouldRunAfter(test)
-                    failFast = System.getenv("FAIL_FAST") == "true"
+                    failFast = providers.environmentVariable("FAIL_FAST").map { it == "true" }.getOrElse(false)
                 }
             }
         }
